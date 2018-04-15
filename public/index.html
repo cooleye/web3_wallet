@@ -1,0 +1,177 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+    <script src="/jquery.min.js"></script>
+    <script src="/bootstrap/js/bootstrap.min.js"></script>
+    <style>
+        .row{
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="container" style="width: 600px;">
+            <div class="row" style="text-align: center">
+                    <h1> 以太坊钱包 </h1>
+                </div>
+        <div class="row">
+            <div class="col-md-12">
+                <input type="text" class="form-control" placeholder="请输入账户密码" id="password">
+            </div>
+        </div>
+        <div class="row">
+                <div class="col-md-12">                   
+                    <input class="btn btn-primary btn-block" type="submit" value="提交" id="addaccount">
+                </div>
+        </div>
+    </div>
+
+    <div class="container" style="width: 600px;margin-top: 10px" id="account-list">    
+    </div>
+
+    <div class="container" style="width: 600px;margin-top: 10px">
+        <div class="row">
+            <div class="col-md-12">
+                    <div class="form-group form-group-sm">
+                        <label class="col-sm-2 control-label" for="address_from">from</label>
+                        <div class="col-sm-10">
+                            <input class="form-control" type="text" id="address_from" placeholder="转账方地址">
+                        </div>
+                    </div>
+            </div>
+        </div>
+        <div class="row">
+                <div class="col-md-12">
+                        <div class="form-group form-group-sm">
+                            <label class="col-sm-2 control-label" for="address_to">to</label>
+                            <div class="col-sm-10">
+                                <input class="form-control" type="text" id="address_to" placeholder="接收方地址">
+                            </div>
+                        </div>
+                </div>
+        </div>
+        <div class="row">
+                <div class="col-md-12">
+                        <div class="form-group form-group-sm">
+                            <label class="col-sm-2 control-label" for="trans_value">金额</label>
+                            <div class="col-sm-10">
+                                <input class="form-control" type="text" id="trans_value" placeholder="转账金额">
+                            </div>
+                        </div>
+                </div>
+        </div>
+        <div class="row">
+                <div class="col-md-12">
+                        <div class="form-group form-group-sm">
+                            <label class="col-sm-2 control-label" for="trans_password">密码</label>
+                            <div class="col-sm-10">
+                                <input class="form-control" type="text" id="trans_password" placeholder="密码">
+                            </div>
+                        </div>
+                </div>
+        </div>
+        <div class="row">
+                <div class="col-md-12">                   
+                    <input class="btn btn-primary btn-block" type="submit" value="转账" id="trans_btn">
+                </div>
+        </div>
+    </div>
+
+
+
+    <script>
+        
+        var accounts = {};
+
+        function gtAccounts(){
+            $.get('http://localhost:8081/accounts',function(accs){
+                console.log(accs)
+                for(var i = 0;i < accs.length;i++){
+                    accounts[accs[i]] = 0;
+                }
+                
+                for( k in accounts){
+                    getBalance(k)
+                }
+                
+                
+            })
+        }
+        gtAccounts()
+        
+
+        $("#addaccount").click(function(){
+
+            if($("#password").val() != ""){
+                $.get('http://localhost:8081/register/?password='+ $("#password").val(),function(res){
+                    console.log(res)
+                    accounts[res.address] = res.balance;
+                    showAccountList();
+                })
+            }
+            $("#password").val("")
+        })
+
+        $("#trans_btn").click(function(){
+
+            var address_from = $("#address_from").val();
+            var address_to = $("#address_to").val();
+            var trans_value = $("#trans_value").val();
+            var trans_password = $("#trans_password").val();
+            if(address_from != '' && address_to != '' && trans_value != "" && trans_password != ""){
+                $.get("http://localhost:8081/sendcoin/",
+                {
+                    address_from,
+                    address_to,
+                    trans_value,
+                    trans_password
+                },function(res){
+                    if(res.msg == 'ok'){
+                        accounts[address_to] = trans_value;
+                        showAccountList();
+                        // getBalance(address_from)
+                        // getBalance(address_to)
+                        
+                    }
+                })
+            }
+            // $("#address_from").val("");
+            $("#address_to").val("");
+            $("#trans_value").val("");
+            $("#trans_password").val("");
+
+        })
+
+        function getBalance(address){
+            console.log(address)
+            if(address){
+                $.get('http://localhost:8081/getBalance?address='+ address,function(bal){
+                    accounts[address] = bal;
+                    showAccountList();
+                })
+            }
+        }
+        function showAccountList(){
+        
+            var str = "";          
+            for(k in accounts){
+                str += `<div class="row">
+                            <div class="col-md-9">
+                                地址：${k}
+                            </div>
+                            <div class="col-md-3">
+                                金额：${accounts[k]}
+                            </div>
+                        </div>`
+            }
+            $("#account-list").html(str)
+        }
+
+    </script>
+</body>
+</html>
