@@ -108,7 +108,9 @@
         $("#addaccount").click(function(){
 
             if($("#password").val() != ""){
-                $.get('http://localhost:8081/register/?password='+ $("#password").val(),function(res){
+                $.post('http://localhost:8081/register/',
+                {password:$("#password").val()},
+                function(res){
                     console.log(res)
                     accounts[res.address] = res.balance;
                     showAccountList();
@@ -124,7 +126,7 @@
             var trans_value = $("#trans_value").val();
             var trans_password = $("#trans_password").val();
             if(address_from != '' && address_to != '' && trans_value != "" && trans_password != ""){
-                $.get("http://localhost:8081/sendcoin/",
+                $.post("http://localhost:8081/sendcoin/",
                 {
                     address_from,
                     address_to,

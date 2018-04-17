@@ -1,8 +1,13 @@
 var express = require("express");  
 var app = express();
 var path = require('path');
-var BigNumber = require('bignumber.js');
+var bodyParser = require('body-parser');
+
+// var BigNumber = require('bignumber.js');
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
 
 var web3 = require("./getWeb3");
 
@@ -17,9 +22,9 @@ app.get('/accounts',function(req,res){
 })
 
 //注册用户
-app.get("/register", function(req, res){
+app.post("/register", function(req, res){
 
-    var password = req.query.password;
+    var password = req.body.password;
     console.log('password:');
     console.log(password);
     web3.eth.personal.newAccount(password)
@@ -43,12 +48,12 @@ app.get("/getBalance", function(req, res){
 
 
 //发送以太币
-app.get("/sendcoin", function(req, res){
+app.post("/sendcoin", function(req, res){
 
-    var address_from = req.query.address_from;  
-    var address_to = req.query.address_to;
-    var trans_value = req.query.trans_value;
-    var password = req.query.trans_password;
+    var address_from = req.body.address_from;  
+    var address_to = req.body.address_to;
+    var trans_value = req.body.trans_value;
+    var password = req.body.trans_password;
     
     console.log('address_from:',address_from)
     console.log('address_to:',address_to)
