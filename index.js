@@ -15,6 +15,7 @@ app.get("/", function(req, res){
     res.sendFile(__dirname + "/public/index.html");
 })
 
+//获取所有用户
 app.get('/accounts',function(req,res){
     web3.eth.getAccounts(function(error, result){
         res.send(result)
@@ -55,12 +56,6 @@ app.post("/sendcoin", function(req, res){
     var trans_value = req.body.trans_value;
     var password = req.body.trans_password;
     
-    console.log('address_from:',address_from)
-    console.log('address_to:',address_to)
-    console.log('trans_value:',trans_value)
-    
-    var nonce = Math.floor(Math.random()*10000).toString(16);
-
     web3.eth.personal.unlockAccount(address_from,password,9999,function(){
         console.log('unlock accounts ok')
         web3.eth.sendTransaction({
